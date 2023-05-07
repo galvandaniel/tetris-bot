@@ -362,6 +362,8 @@ class Board:
 
         """
         ###### BUGGED: filled_columns does not properly account for overhangs!!
+        # This is because upon filling in an overhand, filled columns does NOT
+        # account for what's below the overhang.
         for row, col in to_update:
             self.grid[row][col] = 1
             self.filled_rows[row] += 1
