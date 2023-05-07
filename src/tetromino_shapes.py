@@ -9,10 +9,45 @@ each tetromino, by name.
 
 What follows is a series of shapes, grouped by tetromino.
 
+Each shape also has a "skirt": the space each column needs in order to not
+overlap with anything below or above.
+
+For example:
+I_SHAPE_1 has skirt: [0, 0, 4, 0]
+L_SHAPE_1 has skirt: [0, 3, 3, 0]
+
+Predefining skirts helps make hard drop computations faster.
+
 (It is possible to compute each rotation with some linear algebra, but this
 approach is simpler and hopefully less computationally expensive.)
 
 """
+
+# Each tetromino has 4 shapes and a total brick count of 4.
+TOTAL_SHAPES = 4
+BRICK_COUNT = 4
+
+def compute_skirt(shape):
+    """
+    Compute the largest row index where a brick appears for each column in a
+    tetromino shape, called a "skirt."
+
+    Args:
+        shape (List[List[int]]) - Tetromino shape to compute skirt for.
+    
+    Returns:
+        List[int] - Index for each column of largest occupied row index.
+
+    """
+    column_buckets = [0] * BRICK_COUNT
+
+    # Every time we encounter a brick in a column, update the maximum amount
+    # of space needed to accomodate that brick.
+    for row_index, row in enumerate(shape):
+        for column_index, shape_space in enumerate(row):
+            if shape_space == 1:
+                column_buckets[column_index] = row_index + 1
+    return column_buckets
 
 
 # I shapes.
@@ -177,9 +212,8 @@ Z_SHAPES = [Z_SHAPE_0, Z_SHAPE_1, Z_SHAPE_2, Z_SHAPE_3]
 
 TETROMINO_TYPES = ["I", "J", "L", "O", "S", "T", "Z"]
 TETROMINO_SHAPES = [I_SHAPES, J_SHAPES, L_SHAPES, O_SHAPES, S_SHAPES, T_SHAPES, Z_SHAPES]
+TETROMINO_SKIRTS = [list(map(compute_skirt, shape_list)) for shape_list in TETROMINO_SHAPES]
 
-# Each tetromino has 4 shapes.
-TOTAL_SHAPES = 4
-
-# End goal of a map mapping types to shape lists.
+# End goal of a map mapping types to shape lists and shape skirts.
 SHAPE_MAP = dict(zip(TETROMINO_TYPES, TETROMINO_SHAPES))
+SKIRT_MAP = dict(zip(TETROMINO_TYPES, TETROMINO_SKIRTS))
